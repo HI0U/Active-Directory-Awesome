@@ -9,7 +9,6 @@
 - [__RID__](#RID)
 - [__LDAP__](#LDAP)
 - [__SMB__](#SMB)
-- [__aa__](#SMBCACLS)
 - [__rpcclient__](#rpcclient)
 - [__crackmapexec smb__](#crackmapexec-SMB)
 - [__crackmapexec mssql__](#crackmapexec-MSSQL)
