@@ -32,7 +32,7 @@
 - [__Mimikatz__](#Mimikatz)
 - [__SharpShooter__](#SharpShooter)
 - [__Strengthens your shell__](#Strengthens-your-shell)
-- [__C2 / Command And Control__](#C2-/-Command-And-Control)
+- [__C2 / Command And Control__](#C2-Command-And-Control)
 
 # Main Enum
 
@@ -991,7 +991,7 @@ pwsh
 
 ---
 
-# __C2 / Command-And-Control__
+# __C2 Command And Control__
 
 - __https://www.varonis.com/blog/what-is-c2/__
 - __https://searchsecurity.techtarget.com/feature/Command-and-control-servers-The-puppet-masters-that-govern-malware__
