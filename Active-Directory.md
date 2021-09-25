@@ -408,7 +408,7 @@ def smb_pwn(conn, arch):
 
 ````python
 def smb_pwn(conn, arch):
-	smbConn = conn.get_smbconnection()
+	#smbConn = conn.get_smbconnection()
 
 	#print('creating file c:\\pwned.txt on the target')  <--- Comment this
 	#tid2 = smbConn.connectTree('C$')
